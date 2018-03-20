@@ -385,9 +385,7 @@ public class MainActivity extends AppCompatActivity {
             stream = downloadUrl();
             if (stream == null)
                 Log.e("Stream", "Stream is null");
-            Log.e("Tag", "Got to try 2");
             competitors = xmlParser.parse(stream);
-            Log.e("Tag", "Got to try 3");
 
             // Makes sure that the streams are closed after the app is
             // finished using it.
@@ -401,16 +399,21 @@ public class MainActivity extends AppCompatActivity {
 
     // Given a string representation of a URL, sets up a connection and gets
     // an input stream.
-    private InputStream downloadUrl() throws IOException {
-        URL url = new URL("https://whyjustrun.ca/iof/3.0/competitor_list.xml");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setReadTimeout(10000 /* milliseconds */);
-        conn.setConnectTimeout(15000 /* milliseconds */);
-        conn.setRequestMethod("GET");
-        conn.setDoInput(true);
-        // Starts the query
-        conn.connect();
-        return conn.getInputStream();
+    private InputStream downloadUrl() {
+        HttpURLConnection conn;
+        try {
+            URL url = new URL("https://whyjustrun.ca/iof/3.0/competitor_list.xml");
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(25000 /* milliseconds */);
+            conn.setConnectTimeout(15000 /* milliseconds */);
+            conn.setRequestMethod("GET");
+            conn.setDoInput(true);
+            // Starts the query
+            conn.connect();
+            return conn.getInputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
-
 }

@@ -17,7 +17,7 @@ public interface DaoAccess {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertCompetitorList(List<Competitor> competitors);
 
-    @Query("SELECT * FROM Competitor")
+    @Query("SELECT * FROM Competitor ORDER BY LOWER(lastName)")
     List<Competitor> getCompetitors();
 
     @Query("DELETE FROM Competitor")

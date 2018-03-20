@@ -45,9 +45,6 @@ public class CompetitorXmlParser {
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
             parser.setInput(in, null);
             parser.nextTag();
-
-            Log.e("Tag", "Got here 2");
-
             readFeed(parser);
         } finally {
             if (in != null)
@@ -131,7 +128,6 @@ public class CompetitorXmlParser {
                     break;
             }
         }
-        Log.e("Tag", "Got here");
         parser.require(XmlPullParser.END_TAG, ns, "Person");
         competitor = new Competitor(compId, firstName, lastName);
         return competitor;
