@@ -348,7 +348,7 @@ public class MainActivity extends AppCompatActivity {
         protected List<Competitor> doInBackground(String... search) {
             if (search[0].isEmpty())
                 return database.daoAccess().getAllCompetitors();
-            return database.daoAccess().getCompetitorsSearch(search[0]);
+            return database.daoAccess().getCompetitorsSearch("%" + search[0] + "%");
         }
 
         @Override
