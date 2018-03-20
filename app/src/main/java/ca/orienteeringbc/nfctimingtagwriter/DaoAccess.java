@@ -18,7 +18,10 @@ public interface DaoAccess {
     void insertCompetitorList(List<Competitor> competitors);
 
     @Query("SELECT * FROM Competitor ORDER BY LOWER(lastName)")
-    List<Competitor> getCompetitors();
+    List<Competitor> getAllCompetitors();
+
+    @Query("SELECT * FROM Competitor WHERE firstName LIKE :search OR lastName LIKE :search ORDER BY LOWER(lastName)")
+    List<Competitor> getCompetitorsSearch(String search);
 
     @Query("DELETE FROM Competitor")
     void deleteAllCompetitors();

@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +36,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -86,6 +88,9 @@ public class MainActivity extends AppCompatActivity {
                 .fallbackToDestructiveMigration()
                 .build();
 
+        final EditText editText = findViewById(R.id.search_box);
+        final TextView nextCompetitorText = findViewById(R.id.next_competitor_text);
+
         Button updateCompetitorList = findViewById(R.id.update_competitors_button);
         updateCompetitorList.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,9 +128,8 @@ public class MainActivity extends AppCompatActivity {
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        // Bring up start confirmation screen
                         nextCompetitor = (Competitor) adapterView.getItemAtPosition(i);
-                        // TODO - Call NFC?
+                        nextCompetitorText.setText(getString(R.string.next_to_write, nextCompetitor.toString()));
                         alertDialog.dismiss();
                     }
                 });
@@ -136,13 +140,21 @@ public class MainActivity extends AppCompatActivity {
         });
 
         String lastUpdated = preferences.getString(LAST_UPDATED_TAG, null);
+        lastUpdatedText = findViewById(R.id.last_updated_text);
         if (lastUpdated != null) {
-            lastUpdatedText = findViewById(R.id.last_updated_text);
             lastUpdatedText.setText(getString(R.string.last_updated, lastUpdated));
         }
 
-        // Get the pre-existing list of competitors from the file
-        new LoadCompetitorsTask().execute();
+        Button filterCompetitors = findViewById(R.id.filter_competitors);
+        filterCompetitors.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new LoadCompetitorsTask().execute(editText.getText().toString());
+            }
+        });
+
+        // Get the pre-existing list of competitors from the database
+        new LoadCompetitorsTask().execute(editText.getText().toString());
     }
 
     @Override
@@ -191,6 +203,13 @@ public class MainActivity extends AppCompatActivity {
                     WriteResponse wr = writeTag(getMessage(), detectedTag);
                     String message = (wr.getStatus() == 1 ? "Success: " : "Failed: ") + wr.getMessage();
                     Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+
+                    // Clear next person
+                    if (wr.getStatus() == 1) {
+                        nextCompetitor = null;
+                        TextView textView = findViewById(R.id.next_competitor_text);
+                        textView.setText(R.string.no_competitor_selected);
+                    }
                 } else {
                     Toast.makeText(this,"This tag is not writable", Toast.LENGTH_SHORT).show();
                 }
@@ -323,11 +342,13 @@ public class MainActivity extends AppCompatActivity {
         return new NdefMessage(new NdefRecord(TNF_WELL_KNOWN, RTD_TEXT, null, buffer.array()));
     }
 
-    private class LoadCompetitorsTask extends AsyncTask<Void, Void, List<Competitor>> {
+    private class LoadCompetitorsTask extends AsyncTask<String, Void, List<Competitor>> {
 
         @Override
-        protected List<Competitor> doInBackground(Void... voids) {
-            return database.daoAccess().getCompetitors();
+        protected List<Competitor> doInBackground(String... search) {
+            if (search[0].isEmpty())
+                return database.daoAccess().getAllCompetitors();
+            return database.daoAccess().getCompetitorsSearch(search[0]);
         }
 
         @Override
@@ -365,7 +386,7 @@ public class MainActivity extends AppCompatActivity {
             if (competitors != null && competitors.size() > 0) {
                 competitorList = competitors;
                 selectNextCompetitor.setEnabled(true);
-                String lastUpdated = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+                String lastUpdated = DateFormat.getDateInstance(DateFormat.LONG).format(new Date());
                 lastUpdatedText.setText(getString(R.string.last_updated, lastUpdated));
                 SharedPreferences preferences = getPreferences(MODE_PRIVATE);
                 preferences.edit().putString(LAST_UPDATED_TAG, lastUpdated).apply();

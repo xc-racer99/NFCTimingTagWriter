@@ -6,7 +6,7 @@
     <string name="never_updated">Competitor List Never Updated</string>
     <string name="no_competitor_selected">No Competitor Selected</string>
     <string name="select_next_competitor">Select Next Competitor to Write</string>
-    <string name="next_to_write">Next Competitor to Write %1$s</string>
+    <string name="next_to_write">Next to write: %1$s</string>
 
     <string name="update_competitor_list_fail">Unable to update competitor list - are you connected?</string>
 
@@ -16,4 +16,7 @@
     <string name="enable_nfc">Enable NFC</string>
     <string name="enable_nfc_reason">Go to Settings to enable NFC</string>
     <string name="go">Go</string>
+
+    <string name="search_term">Filter by name</string>
+    <string name="filter">Filter</string>
 </resources>
